@@ -18,9 +18,12 @@ class HookLogger:
         """Initialize logger for a specific hook"""
         self.hook_name = hook_name
 
-        # Create logs directory
-        self.log_dir = Path(__file__).parent.parent / "logs"
-        self.log_dir.mkdir(exist_ok=True)
+        # Use data directory for logs to make them accessible from host
+        # Check environment variable first, fall back to default
+        import os
+        data_dir = os.getenv("AMPLIFIER_DATA_DIR", ".data")
+        self.log_dir = Path(data_dir) / "logs"
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # Create log file with today's date
         today = datetime.now().strftime("%Y%m%d")

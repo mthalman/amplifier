@@ -55,7 +55,7 @@ RUN uv venv --python python3.11 .venv && \
 COPY . .
 
 # Create data directory for Amplifier and required subdirectories
-RUN mkdir -p ${AMPLIFIER_DATA_DIR}
+RUN mkdir -p ${AMPLIFIER_DATA_DIR}/logs
 
 # Set environment variables
 ENV TARGET_DIR=/workspace \

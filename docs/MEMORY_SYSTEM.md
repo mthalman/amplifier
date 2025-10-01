@@ -43,6 +43,9 @@ MEMORY_EXTRACTION_MAX_MEMORIES=10      # Max memories per session
 
 # Storage location
 MEMORY_STORAGE_DIR=.data/memories
+
+# Data directory (also used for logs)
+AMPLIFIER_DATA_DIR=/app/amplifier-data  # Default in Docker
 ```
 
 ## Architecture
@@ -134,12 +137,24 @@ Memories are stored in JSON format at `.data/memory.json`:
 
 ### Log Files
 
-When enabled, the memory system logs to `.claude/logs/`:
-- `stop_hook_YYYYMMDD.log` - Stop hook logs
-- `session_start_YYYYMMDD.log` - Session start logs  
-- `post_tool_use_YYYYMMDD.log` - Post tool use logs
+Hook logs are now stored in the data directory for accessibility from the host:
+- Location: `$AMPLIFIER_DATA_DIR/logs/` (default: `.data/logs/`)
+- In Docker: `/app/amplifier-data/logs/`
+- Files:
+  - `stop_hook_YYYYMMDD.log` - Stop hook logs
+  - `session_start_YYYYMMDD.log` - Session start logs
+  - `post_tool_use_YYYYMMDD.log` - Post tool use logs
 
 Logs are automatically rotated after 7 days.
+
+To view logs from your host machine (when using Docker):
+```bash
+# View today's post tool use logs
+cat amplifier-data/logs/post_tool_use_$(date +%Y%m%d).log
+
+# Tail logs in real-time
+tail -f amplifier-data/logs/post_tool_use_$(date +%Y%m%d).log
+```
 
 ### Common Issues
 

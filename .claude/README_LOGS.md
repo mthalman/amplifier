@@ -1,6 +1,15 @@
 # Claude Code Hook Logs
 
-The `.claude/logs` directory contains file-based logs from Claude Code hooks for debugging and monitoring.
+Hook logs are stored in the data directory to make them accessible from the host machine.
+
+## Log Location
+
+**Default location**: `$AMPLIFIER_DATA_DIR/logs/`
+- Local development: `.data/logs/`
+- Docker container: `/app/amplifier-data/logs/`
+- Host (when using Docker): `amplifier-data/logs/`
+
+This allows you to access logs from your host machine when running in Docker.
 
 ## Log Files
 
@@ -31,22 +40,40 @@ Logs are automatically cleaned up after 7 days to prevent disk usage issues.
 
 ## Viewing Logs
 
-To tail a specific hook's logs:
+### From within Docker container:
 
 ```bash
-tail -f .claude/logs/stop_hook_*.log
+tail -f $AMPLIFIER_DATA_DIR/logs/stop_hook_*.log
 ```
+
+### From host machine (when using Docker):
+
+```bash
+# Tail logs in real-time
+tail -f amplifier-data/logs/post_tool_use_$(date +%Y%m%d).log
+
+# View all today's logs
+cat amplifier-data/logs/*_$(date +%Y%m%d).log
+
+# Search for errors across all logs
+grep ERROR amplifier-data/logs/*.log
+
+# List all log files
+ls -la amplifier-data/logs/
+```
+
+### General commands:
 
 To search for errors:
 
 ```bash
-grep ERROR .claude/logs/*.log
+grep ERROR $AMPLIFIER_DATA_DIR/logs/*.log
 ```
 
 To see today's logs:
 
 ```bash
-ls -la .claude/logs/*_$(date +%Y%m%d).log
+ls -la $AMPLIFIER_DATA_DIR/logs/*_$(date +%Y%m%d).log
 ```
 
 ## Implementation
