@@ -58,7 +58,7 @@ display_dir=$(echo "$current_dir" | sed "s|^$HOME|~|")
 
 # Determine model color based on cost tier
 # Opus models = Red (high cost)
-# Sonnet models = Green (medium cost)  
+# Sonnet models = Green (medium cost)
 # Haiku models = Blue (low cost)
 case "$model_id" in
     *opus*)
@@ -95,7 +95,7 @@ git_formatted=""
 if git rev-parse --is-inside-work-tree &>/dev/null; then
     # Get current branch name (or commit hash if detached)
     branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-    
+
     if [ -n "$branch" ]; then
         # Check for uncommitted changes (both staged and unstaged)
         if ! git diff-index --quiet HEAD -- 2>/dev/null || ! git diff --quiet 2>/dev/null; then
@@ -105,17 +105,17 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
             dirty_indicator=""
             git_color="36"  # Cyan for clean working tree
         fi
-        
+
         # Get remote name if it exists
         remote=$(git remote | head -n1 2>/dev/null)
-        
+
         # Format git info with branch, dirty indicator, and remote
         if [ -n "$remote" ]; then
             git_info="(${branch}${dirty_indicator} → ${remote})"
         else
             git_info="(${branch}${dirty_indicator})"
         fi
-        
+
         # Apply color formatting
         git_formatted="\033[${git_color}m${git_info}\033[0m"
     fi
