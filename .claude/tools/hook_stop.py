@@ -21,6 +21,23 @@ logger = HookLogger("stop_hook")
 try:
     from amplifier.extraction import MemoryExtractor
     from amplifier.memory import MemoryStore
+
+    # Redirect extraction module's logger to our hook logger
+    import logging
+    extraction_logger = logging.getLogger("amplifier.extraction.core")
+
+    class HookLogHandler(logging.Handler):
+        """Forward extraction logs to hook logger"""
+        def emit(self, record):
+            msg = self.format(record)
+            # Remove [EXTRACTION] prefix if present to avoid duplication
+            if "[EXTRACTION]" in msg:
+                msg = msg.replace("[EXTRACTION]", "").strip()
+            logger.info(f"[EXTRACTION] {msg}")
+
+    extraction_logger.addHandler(HookLogHandler())
+    extraction_logger.setLevel(logging.DEBUG)
+
 except ImportError as e:
     logger.error(f"Failed to import amplifier modules: {e}")
     # Exit gracefully to not break hook chain
@@ -202,7 +219,10 @@ async def main():
             # Initialize modules
             logger.info("Initializing extractor and store")
             extractor = MemoryExtractor()
-            store = MemoryStore()
+
+            # Get data directory from environment (same as hook_logger)
+            data_dir = Path(os.getenv("AMPLIFIER_DATA_DIR", ".data"))
+            store = MemoryStore(data_dir=data_dir)
 
             # Check data directory
             logger.debug(f"Data directory: {store.data_dir}")

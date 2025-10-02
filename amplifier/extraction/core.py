@@ -247,6 +247,9 @@ Return ONLY valid JSON."""
 
         try:
             logger.info(f"[EXTRACTION] Setting timeout to {self.config.memory_extraction_timeout} seconds")
+            logger.info(f"[EXTRACTION] Conversation length: {len(conversation)} chars")
+            logger.info(f"[EXTRACTION] Context: {context[:100] if context else 'None'}")
+
             async with asyncio.timeout(self.config.memory_extraction_timeout):
                 logger.info(
                     f"[EXTRACTION] Creating Claude Code SDK client with model: {self.config.memory_extraction_model}"
@@ -263,15 +266,20 @@ Return ONLY valid JSON."""
 
                     logger.info("[EXTRACTION] Receiving response from Claude Code SDK")
                     response = ""
+                    message_count = 0
                     async for message in client.receive_response():
+                        message_count += 1
+                        logger.debug(f"[EXTRACTION] Received message #{message_count}, type: {type(message).__name__}")
                         if hasattr(message, "content"):
                             content = getattr(message, "content", [])
                             if isinstance(content, list):
                                 for block in content:
                                     if hasattr(block, "text"):
-                                        response += getattr(block, "text", "")
+                                        text = getattr(block, "text", "")
+                                        response += text
+                                        logger.debug(f"[EXTRACTION] Added {len(text)} chars to response")
 
-                    logger.info(f"[EXTRACTION] Received response length: {len(response)}")
+                    logger.info(f"[EXTRACTION] Received {message_count} messages, response length: {len(response)}")
 
                     if not response:
                         logger.warning("[EXTRACTION] Empty response from Claude Code SDK")
@@ -298,15 +306,17 @@ Return ONLY valid JSON."""
             logger.warning(
                 f"[EXTRACTION] Claude Code SDK timed out after {self.config.memory_extraction_timeout} seconds"
             )
+            return None
         except json.JSONDecodeError as e:
             logger.error(f"[EXTRACTION] Failed to parse extraction response: {e}")
+            logger.error(f"[EXTRACTION] Response content: {response[:500] if 'response' in locals() else 'N/A'}")
+            return None
         except Exception as e:
-            logger.error(f"[EXTRACTION] Claude Code SDK extraction error: {e}")
+            logger.error(f"[EXTRACTION] Claude Code SDK extraction error: {type(e).__name__}: {e}")
             import traceback
 
             logger.error(f"[EXTRACTION] Traceback: {traceback.format_exc()}")
-
-        return None
+            return None
 
     def _is_system_message(self, content: str) -> bool:
         """Check if content is a system/hook message that should be filtered"""

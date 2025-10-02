@@ -66,7 +66,10 @@ async def main():
 
         # Initialize modules
         logger.info("Initializing store and validator")
-        store = MemoryStore()
+
+        # Get data directory from environment (same as hook_logger)
+        data_dir = Path(os.getenv("AMPLIFIER_DATA_DIR", ".data"))
+        store = MemoryStore(data_dir=data_dir)
         validator = ClaimValidator()
 
         # Get all memories for validation

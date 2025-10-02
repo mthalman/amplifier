@@ -42,10 +42,7 @@ MEMORY_EXTRACTION_MAX_CONTENT_LENGTH=500  # Max chars per message
 MEMORY_EXTRACTION_MAX_MEMORIES=10      # Max memories per session
 
 # Storage location
-MEMORY_STORAGE_DIR=.data/memories
-
-# Data directory (also used for logs)
-AMPLIFIER_DATA_DIR=/app/amplifier-data  # Default in Docker
+AMPLIFIER_DATA_DIR=/app/amplifier-data  # Default in Docker, memories stored in memories/ subdirectory
 ```
 
 ## Architecture
@@ -103,7 +100,7 @@ After tool use (PostToolUse event), the system:
 
 ## Memory Storage Format
 
-Memories are stored in JSON format at `.data/memory.json`:
+Memories are stored in JSON format at `$AMPLIFIER_DATA_DIR/memory.json` (or `.data/memory.json` if not set):
 
 ```json
 {

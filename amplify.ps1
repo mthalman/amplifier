@@ -9,12 +9,17 @@
     Path to the target project directory
 .PARAMETER DataDir
     Optional path to Amplifier data directory (defaults to ./amplifier-data)
+.PARAMETER EnableMemory
+    Enable the memory system (stores conversation learnings and decisions)
 .EXAMPLE
     # First set your Claude OAuth token
     $env:CLAUDE_CODE_OAUTH_TOKEN = "your-oauth-token-here"
     ./amplify.ps1 "C:\MyProject"
 .EXAMPLE
     ./amplify.ps1 "C:\MyProject" "C:\amplifier-data"
+.EXAMPLE
+    # Enable memory system
+    ./amplify.ps1 "C:\MyProject" -EnableMemory
 #>
 
 param(
@@ -22,7 +27,10 @@ param(
     [string]$ProjectPath,
 
     [Parameter(Mandatory = $false)]
-    [string]$DataDir
+    [string]$DataDir,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$EnableMemory
 )
 
 # Function to write colored output
@@ -117,6 +125,17 @@ else {
     exit 1
 }
 
+# Add memory system configuration if enabled
+if ($EnableMemory) {
+    Write-Status "✅ Memory system enabled"
+    Write-Status "📝 Conversations will be stored for future reference"
+    Write-Status "📂 Data directory: $ResolvedDataDir"
+    $EnvArgs += @("-e", "MEMORY_SYSTEM_ENABLED=true")
+}
+else {
+    Write-Status "💤 Memory system disabled (use -EnableMemory to enable)"
+}
+
 # Function to convert paths for Docker mounting based on environment
 function ConvertTo-DockerPath {
     param([string]$LocalPath)
@@ -170,6 +189,11 @@ Write-Status "🚀 Starting Amplifier Docker container..."
 Write-Status "📁 Project: $DockerProjectPath → /workspace"
 Write-Status "💾 Data: $DockerDataPath → /app/amplifier-data"
 Write-Status "🔑 Authentication: Claude Pro OAuth Token (no billing)"
+
+if ($EnableMemory) {
+    Write-Status "🧠 Memory System: ENABLED"
+    Write-Status "   Conversations will be saved and recalled in future sessions"
+}
 
 Write-Warning "⚠️  IMPORTANT: When Claude starts, send this first message:"
 Write-Host "===========================================" -ForegroundColor Yellow
